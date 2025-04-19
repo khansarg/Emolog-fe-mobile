@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({Key? key}) : super(key: key);
+  const ChangePasswordPage({super.key});
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
@@ -91,8 +91,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(width: 12),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xB47878),
-                  side: const BorderSide(color: Color(0xFB47878)),
+                  foregroundColor: const Color(0x00b47878),
+                  side: const BorderSide(color: Color(0x0fb47878)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -101,14 +101,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: const Text('Cancel'),
               ),
               const SizedBox(width: 12),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xB47878),
-                  side: const BorderSide(color: Color(0xFB47878)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Hapus OutlinedButton kosong yang tidak ada fungsi onPressed
             ],
           ),
         ],

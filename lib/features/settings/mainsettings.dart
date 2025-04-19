@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '/features/settings/account.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +10,8 @@ class SettingsPage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 2, // Menandakan tab Settings sedang aktif
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: '',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: ''),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings, color: Color(0xFFA07677)),
             label: '',
@@ -41,7 +35,9 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AccountPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const AccountPage(),
+                    ),
                   );
                 },
                 child: Container(
@@ -57,7 +53,10 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'Account',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -73,8 +72,8 @@ class SettingsPage extends StatelessWidget {
               InkWell(
                 onTap: () {},
                 child: Container(
-                  width: 340, // Mengatur lebar yang sama
-                  height: 90,
+                  width: 343, // Mengatur lebar yang sama
+                  height: 110,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade300),
@@ -85,7 +84,10 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'Daily Journal Reminder',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -113,7 +115,10 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'About Us',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -130,7 +135,8 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {},
                 child: Container(
                   width: 350, // Mengatur lebar yang sama
-                  height: 90, // Mengatur tinggi yang sama untuk membuatnya kotak
+                  height:
+                      90, // Mengatur tinggi yang sama untuk membuatnya kotak
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.redAccent),
@@ -142,7 +148,11 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'Log Out',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
