@@ -1,24 +1,51 @@
 import 'package:flutter/material.dart';
 import '/features/settings/account.dart';
+import '/Button/BottomNavigationBar.dart';  // Pastikan Anda mengimpor BottomNavigationBar
 
-class SettingsPage extends StatelessWidget {
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SettingsPage(),  // Ganti dengan halaman yang Anda inginkan
+    );
+  }
+}
+
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  int _currentIndex = 2; // Tab aktif adalah Settings
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index; // Mengubah index tab yang aktif
+    });
+
+    // Navigasi sesuai tab yang dipilih
+    if (index == 0) {
+      // Navigasi ke halaman Home
+    } else if (index == 1) {
+      // Navigasi ke halaman Book
+    } else if (index == 2) {
+      // Navigasi ke halaman Settings (halaman ini sudah terbuka)
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2, // Menandakan tab Settings sedang aktif
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings, color: Color(0xFFA07677)),
-            label: '',
-          ),
-        ],
-      ),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 24),
@@ -53,45 +80,11 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'Account',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Manage your username, email, and password',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Daily Journal Reminder setting item
-              InkWell(
-                onTap: () {},
-                child: Container(
-                  width: 343, // Mengatur lebar yang sama
-                  height: 110,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Daily Journal Reminder',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'A daily journal reminder is a feature that sends notifications.',
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                     ],
@@ -115,10 +108,7 @@ class SettingsPage extends StatelessWidget {
                     children: [
                       const Text(
                         'About Us',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -135,8 +125,7 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {},
                 child: Container(
                   width: 350, // Mengatur lebar yang sama
-                  height:
-                      90, // Mengatur tinggi yang sama untuk membuatnya kotak
+                  height: 90, // Mengatur tinggi yang sama untuk membuatnya kotak
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.redAccent),
@@ -166,6 +155,10 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(  // Memanggil CustomBottomNavBar
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
