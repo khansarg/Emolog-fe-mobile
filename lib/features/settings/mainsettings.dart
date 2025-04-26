@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '/features/settings/account.dart';
-import '/Button/BottomNavigationBar.dart';  // Pastikan Anda mengimpor BottomNavigationBar
+import 'account.dart';
+import 'aboutus.dart'; // Impor halaman AboutUsPage
+import 'logout.dart'; // Impor LogoutDialog
+import '/Button/BottomNavigationBar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SettingsPage(),  // Ganti dengan halaman yang Anda inginkan
+      home: SettingsPage(),
     );
   }
 }
@@ -30,17 +32,23 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index; // Mengubah index tab yang aktif
+      _currentIndex = index;
     });
+  }
 
-    // Navigasi sesuai tab yang dipilih
-    if (index == 0) {
-      // Navigasi ke halaman Home
-    } else if (index == 1) {
-      // Navigasi ke halaman Book
-    } else if (index == 2) {
-      // Navigasi ke halaman Settings (halaman ini sudah terbuka)
-    }
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LogoutDialog(
+          onLogout: () {
+            // TODO: Arahkan ke halaman login
+            // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+            print('User logged out');
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -68,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
                 },
                 child: Container(
-                  width: 350, // Mengatur lebar yang sama
+                  width: 350,
                   height: 90,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -94,9 +102,16 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 12),
               // About Us setting item
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutUsPage(), // Navigasi ke halaman About Us
+                    ),
+                  );
+                },
                 child: Container(
-                  width: 350, // Mengatur lebar yang sama
+                  width: 350,
                   height: 90,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -120,12 +135,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Log Out setting item (Container with equal width and height)
+              // Log Out setting item
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  _showLogoutDialog(context); // Menampilkan dialog konfirmasi logout
+                },
                 child: Container(
-                  width: 350, // Mengatur lebar yang sama
-                  height: 90, // Mengatur tinggi yang sama untuk membuatnya kotak
+                  width: 350,
+                  height: 90,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.redAccent),
@@ -137,11 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       const Text(
                         'Log Out',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
                       const SizedBox(height: 4),
                       Text(
