@@ -54,13 +54,13 @@ class _AccountPageState extends State<AccountPage> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Khansa Resqi',
+              'halo123',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 32),
-            _buildInputField('Username', _usernameController, 'KhansaResqi'),
+            _buildInputField('Username', _usernameController, 'halo123'),
             const SizedBox(height: 16),
-            _buildInputField('Email', _emailController, 'khansaresqi@mail.com'),
+            _buildInputField('Email', _emailController, 'halo123@mail.com'),
             const SizedBox(height: 16),
             // Tombol untuk menampilkan Change Password sebagai dialog
             _buildPasswordButton(context),
