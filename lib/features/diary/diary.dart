@@ -50,6 +50,7 @@ class _DiaryPageState extends State<DiaryPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8D7D5),
       body: isDayView ? _buildDayView() : WeekView(
+        entries: entries, // ini tambahan penting
         onToggleView: () {
           setState(() {
             isDayView = true;

@@ -1,5 +1,6 @@
 import 'package:emolog/features/register/register.dart';
 import 'package:emolog/features/settings/mainsettings.dart';
+import 'package:emolog/features/Home/moodlog.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                      ElevatedButton(onPressed: () {
                        if (username == 'halo123' && password == 'hi'){
                          Navigator.push(context,
-                             MaterialPageRoute(builder: (context) => const SettingsPage()));
+                             MaterialPageRoute(builder: (context) => const MoodLogScreen()));
                        } else {
                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Username atau Password salah')));
                        }

@@ -53,7 +53,7 @@ class LogoutDialog extends StatelessWidget {
                   ),
                   onPressed: () {
                     onLogout(); //aksi logout
-                    Navigator.pop(context); // Menutup dialog setelah Logout
+                    Navigator.pushReplacementNamed(context, '/'); // Menutup dialog setelah Logout
                   },
                   child: const Text(
                     'Logout',

@@ -19,7 +19,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
         // Navigasi sesuai tab
         if (index == 0) {
-          Navigator.pushNamed(context, '/'); // Home (sementara ke WelcomePage)
+          Navigator.pushNamed(context, '/homeML'); // Home (sementara ke WelcomePage)
         } else if (index == 1) {
           Navigator.pushNamed(context, '/diary'); // DiaryPage
         } else if (index == 2) {

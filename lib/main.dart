@@ -1,3 +1,5 @@
+import 'package:emolog/features/Home/moodlog.dart';
+import 'package:emolog/features/Home/moodmate.dart';
 import 'package:flutter/material.dart';
 import 'features/login/login.dart';
 import 'features/register/register.dart';
@@ -22,7 +24,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const WelcomePage(), // halaman pertama
         '/login': (context) => const LoginPage(),
         '/settings': (context) => const SettingsPage(),
-        '/diary': (context) => const DiaryPage(), // <-- Tambahkan route diary di sini
+        '/diary': (context) => const DiaryPage(), //
+        '/homeML' : (context) => const MoodLogScreen(),
+        '/homeMM' : (context) => const MoodMateScreen()
       },
     );
   }
