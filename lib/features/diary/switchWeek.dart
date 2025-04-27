@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'diary.dart'; // supaya bisa akses DiaryEntry dari DiaryPage
+import 'diary.dart'; 
 
 class WeekView extends StatelessWidget {
   final VoidCallback onToggleView;
   final int currentNavIndex;
   final Function(int) onNavTap;
-  final List<DiaryEntry> entries; // tambahkan entries dari DiaryPage
+  final List<DiaryEntry> entries; 
 
   const WeekView({
     Key? key,
