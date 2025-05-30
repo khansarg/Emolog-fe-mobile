@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AddDiaryPage extends StatefulWidget {
-  const AddDiaryPage({Key? key}) : super(key: key);
+  final DateTime selectedDate;
+  const AddDiaryPage({Key? key, required this.selectedDate}) : super(key: key);
 
   @override
   _AddDiaryPageState createState() => _AddDiaryPageState();
@@ -10,20 +15,74 @@ class AddDiaryPage extends StatefulWidget {
 class _AddDiaryPageState extends State<AddDiaryPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
+  late DateTime _selectedDate;
 
-  void _saveDiary() {
-    String title = _titleController.text.trim();
-    String content = _contentController.text.trim();
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.selectedDate;
+  }
 
-    if (title.isNotEmpty || content.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Diary berhasil disimpan!')),
-      );
-      Navigator.pop(context);
-    } else {
+  Future<void> _saveDiaryToBackend() async {
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+
+    if (title.isEmpty && content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Diary kosong!')),
       );
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final username = prefs.getString('username');
+
+    if (token == null || username == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tidak ditemukan token login.')),
+      );
+      return;
+    }
+
+    final uri = Uri.parse('http://10.0.2.2:8000/api/diary'); // sesuaikan endpoint
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'title': title,
+        'content': content,
+        'diary_date': DateFormat('yyyy-MM-dd').format(_selectedDate),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Diary berhasil disimpan!')),
+      );
+      Navigator.pop(context, true); // kirim sinyal berhasil
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menyimpan: ${response.body}')),
+      );
+    }
+  }
+
+  void _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
@@ -38,65 +97,104 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'My Diary',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
+      body: SafeArea(
+        child: Stack(
           children: [
-            TextField(
-              controller: _titleController,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w500,
-              ),
-              decoration: const InputDecoration(
-                hintText: 'Judul',
-                hintStyle: TextStyle(color: Colors.grey),
-                border: InputBorder.none,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(Icons.arrow_back, size: 24),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'My Diary',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: _pickDate,
+                      ),
+                      Text(DateFormat('dd MMM yyyy').format(_selectedDate)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _titleController,
+                    style: const TextStyle(fontSize: 16),
+                    decoration: const InputDecoration(
+                      hintText: 'Judul',
+                      border: UnderlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _contentController,
+                      decoration: const InputDecoration(
+                        hintText: 'Mulai menulis...',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      maxLines: null,
+                      expands: true,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Divider(),
-            Expanded(
-              child: TextField(
-                controller: _contentController,
-                maxLines: null,
-                expands: true,
-                style: const TextStyle(
-                  fontSize: 18,
-                  height: 1.5,
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'Mulai menulis...',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                ),
+            Positioned(
+              left: 12,
+              top: MediaQuery.of(context).size.height * 0.3,
+              child: Column(
+                children: [
+                  _buildSidebarButton(Icons.close, () => Navigator.pop(context)),
+                  const SizedBox(height: 12),
+                  _buildSidebarButton(Icons.check, _saveDiaryToBackend),
+                  const SizedBox(height: 12),
+                  _buildSidebarButton(Icons.emoji_emotions, () {}),
+                  const SizedBox(height: 12),
+                  _buildSidebarButton(Icons.menu, () {}),
+                ],
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveDiary,
-        backgroundColor: const Color(0xFFB47878),
-        child: const Icon(Icons.check, color: Colors.white),
+      floatingActionButton: SizedBox(
+        height: 56,
+        width: 56,
+        child: FloatingActionButton(
+          onPressed: _saveDiaryToBackend,
+          backgroundColor: const Color(0xFFB47878),
+          child: const Icon(Icons.check, color: Colors.white, size: 28),
+          shape: const CircleBorder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebarButton(IconData icon, VoidCallback onPressed) {
+    return SizedBox(
+      height: 40,
+      width: 40,
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 2,
+        heroTag: null,
+        child: Icon(icon, size: 20),
+        shape: const CircleBorder(),
       ),
     );
   }

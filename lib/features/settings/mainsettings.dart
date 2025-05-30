@@ -40,13 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return LogoutDialog(
-          onLogout: () {
-            // TODO: Arahkan ke halaman login
-            // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-            print('User logged out');
-          },
-        );
+        return const LogoutDialog(); // Tidak perlu onLogout lagi
       },
     );
   }

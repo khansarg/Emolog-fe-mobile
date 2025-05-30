@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import '/Button/BottomNavigationBar.dart';
 import 'moodlog.dart';
-import '/Button/BottomNavigationBar.dart'; // Import CustomBottomNavBar
 
 class MoodMateScreen extends StatefulWidget {
   const MoodMateScreen({super.key});
@@ -12,6 +15,20 @@ class MoodMateScreen extends StatefulWidget {
 class _MoodMateScreenState extends State<MoodMateScreen> {
   int _currentIndex = 0;
   bool isMoodMateActive = true;
+  String todayMood = '';
+  String username = '';
+
+  final Map<String, String> moodQuotes = {
+    'Happy': 'CIE HARI INI HAPPY, CAPTURE THIS MOMENT KARENA MOMEN BAHAGIA SEPERTI INI HARUS DIABADIKAN!',
+    'Sad': 'Sedih itu hal yang wajar kok! tapi jangan sampai berlarut dalam kesedihan yaa, semuanya pasti berlalu kok!',
+    'Neutral': 'Hari ini biasa aja ya? gapapa, jadiin hari ini waktu untuk kamu istirahat ya!',
+  };
+
+  final Map<String, String> moodEmojis = {
+    'Sad': '😭',
+    'Neutral': '😐',
+    'Happy': '😂',
+  };
 
   void _onItemTapped(int index) {
     setState(() {
@@ -25,6 +42,42 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
       MaterialPageRoute(builder: (context) => const MoodLogScreen()),
     );
   }
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedUsername = prefs.getString('username') ?? '';
+    setState(() {
+      username = storedUsername;
+    });
+  }
+  Future<void> fetchTodayMood() async {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/moods/today'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        todayMood = data['mood'] ?? '';
+      });
+    } else {
+      print('Failed to load mood: ${response.statusCode}');
+    }
+  }
+
+
+  Future<String> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token') ?? '';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTodayMood();
+    loadUsername();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +87,8 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
         top: false,
         child: Column(
           children: [
-            // Header
             Container(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 30), // Biar ga ada putih atas
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 50, bottom: 30),
               decoration: const BoxDecoration(
                 color: Color(0xFFF7D8DE),
                 borderRadius: BorderRadius.only(
@@ -48,7 +100,7 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Hey, Khansa 👍",
+                    "Hey, ${username.isNotEmpty ? username : 'User'} 👍",
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -57,7 +109,7 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "Review Your Mood History",
+                    "This is your today's mood",
                     style: TextStyle(
                       fontSize: 16,
                       color: Color(0xFF7A7A7A),
@@ -74,7 +126,6 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                     ),
                     child: Row(
                       children: [
-                        // Mood Log Button
                         Expanded(
                           child: GestureDetector(
                             onTap: navigateToMoodLog,
@@ -98,7 +149,6 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                             ),
                           ),
                         ),
-                        // Mood Mate Button
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
@@ -132,8 +182,6 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                 ],
               ),
             ),
-
-            // Content
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -150,23 +198,23 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("😭", style: TextStyle(fontSize: 36)),
-                        const SizedBox(width: 20),
-                        const Text("😐", style: TextStyle(fontSize: 36)),
-                        const SizedBox(width: 20),
-                        Container(
-                          padding: const EdgeInsets.all(8.0), // Menambah padding untuk jarak dengan teks
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF7D8DE), // Warna background
-                            borderRadius: BorderRadius.circular(12), // Membuat sudut membulat
+                      children: moodEmojis.entries.map((entry) {
+                        final isSelected = entry.key == todayMood;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFFF7D8DE) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              entry.value,
+                              style: const TextStyle(fontSize: 36),
+                            ),
                           ),
-                          child: const Text(
-                            "😂",
-                            style: TextStyle(fontSize: 36),
-                          ),
-                        ),
-                      ],
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: 40),
                     const Text(
@@ -178,12 +226,13 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Text(
-                        "CIE HARI INI HAPPY, CAPTURE THIS MOMENT KARENA MOMEN BAHAGIA SEPERTI INI HARUS DIABADIKAN!",
+                        moodQuotes[todayMood] ??
+                            'Belum ada mood hari ini. Yuk ekspresikan perasaanmu!',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontStyle: FontStyle.italic,
                           fontFamily: 'Poppins',

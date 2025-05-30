@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '/features/settings/changepassword.dart'; // Pastikan mengimpor halaman ChangePasswordPage
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '/features/settings/changepassword.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -9,16 +11,52 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  final _usernameController = TextEditingController(text: 'KhansaResqi');
-  final _emailController = TextEditingController(text: 'khansaresqi@mail.com');
-  final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController(text: 'Fill your username here');
+  final _emailController = TextEditingController(text: 'Fill your email here');
 
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _verifyAccount(String field, String newValue) async {
+    final url = Uri.parse('http://10.0.2.2:8000/api/check-user');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': field == 'Username' ? newValue : _usernameController.text,
+          'email': field == 'Email' ? newValue : _emailController.text,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User ditemukan")),
+        );
+        setState(() {
+          if (field == 'Username') {
+            _usernameController.text = newValue;
+          } else if (field == 'Email') {
+            _emailController.text = newValue;
+          }
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Terjadi kesalahan')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal terhubung ke server: $e')),
+      );
+    }
   }
 
   @override
@@ -27,10 +65,7 @@ class _AccountPageState extends State<AccountPage> {
       appBar: AppBar(
         title: const Text(
           'Account',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -54,15 +89,14 @@ class _AccountPageState extends State<AccountPage> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'halo123',
+              'This Is Your Account',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 32),
-            _buildInputField('Username', _usernameController, 'halo123'),
+            _buildInputField('Username', _usernameController, 'Fill your username here'),
             const SizedBox(height: 16),
-            _buildInputField('Email', _emailController, 'halo123@mail.com'),
+            _buildInputField('Email', _emailController, 'Fill your email here'),
             const SizedBox(height: 16),
-            // Tombol untuk menampilkan Change Password sebagai dialog
             _buildPasswordButton(context),
           ],
         ),
@@ -70,7 +104,6 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  // Fungsi untuk membangun input field
   Widget _buildInputField(String label, TextEditingController controller, String defaultValue) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,11 +135,10 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  // Dialog konfirmasi untuk perubahan data
   void _showConfirmationDialog(BuildContext context, String field, String newValue) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevents dismissing by tapping outside the dialog
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
@@ -134,30 +166,21 @@ class _AccountPageState extends State<AccountPage> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(context); // Menutup dialog jika Cancel
+                        Navigator.pop(context);
                       },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.red)),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Tombol Save dengan warna merah
+                        backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          if (field == 'Username') {
-                            _usernameController.text = newValue;
-                          } else if (field == 'Email') {
-                            _emailController.text = newValue;
-                          }
-                        });
-                        Navigator.pop(context); // Tutup dialog dan simpan perubahan
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _verifyAccount(field, newValue);
                       },
                       child: const Text('Save'),
                     ),
@@ -171,23 +194,54 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  // Tombol untuk menampilkan popup Change Password sebagai dialog
   Widget _buildPasswordButton(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // Tampilkan dialog ChangePasswordPage sebagai popup
+      onTap: () async {
+        final username = _usernameController.text;
+        final email = _emailController.text;
+
+        // Show loading
         showDialog(
           context: context,
-          builder: (context) => const ChangePasswordPage(),
+          barrierDismissible: false,
+          builder: (context) => const Center(child: CircularProgressIndicator()),
         );
+
+        try {
+          final url = Uri.parse('http://10.0.2.2:8000/api/check-user');
+          final response = await http.post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'username': username, 'email': email}),
+          );
+
+          Navigator.pop(context); // Close loading
+
+          if (response.statusCode == 200) {
+            showDialog(
+              context: context,
+              builder: (context) => const ChangePasswordPage(),
+            );
+          } else {
+            final data = jsonDecode(response.body);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(data['message'] ?? 'Verifikasi gagal')),
+            );
+          }
+        } catch (e) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal terhubung ke server: $e')),
+          );
+        }
       },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.red), // Warna border merah
+          border: Border.all(color: Colors.red),
           borderRadius: BorderRadius.circular(16),
-          color: Colors.red, // Warna latar belakang merah
+          color: Colors.red,
         ),
         child: const Text(
           'Change Password',

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -10,8 +13,8 @@ class ChangePasswordPage extends StatefulWidget {
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
-  bool _obscureTextCurrent = true; // Untuk mengontrol tampilan password saat ini
-  bool _obscureTextNew = true; // Untuk mengontrol tampilan password baru
+  bool _obscureTextCurrent = true;
+  bool _obscureTextNew = true;
 
   @override
   void dispose() {
@@ -20,20 +23,66 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     super.dispose();
   }
 
-  void _savePassword() {
+  Future<void> _savePassword() async {
     final currentPassword = _currentPasswordController.text;
     final newPassword = _newPasswordController.text;
 
-    // Simulasi validasi dan simpan
     if (currentPassword.isEmpty || newPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill both fields.')),
       );
-    } else {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password updated successfully!')),
+        const SnackBar(content: Text('Not authenticated. Please login again.')),
       );
-      Navigator.pop(context, true);  // Mengembalikan nilai true ke halaman sebelumnya
+      return;
+    }
+
+    final url = Uri.parse('http://10.0.2.2:8000/api/change-password'); // ganti IP jika perlu
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        }),
+      );
+
+      // Cek apakah response valid JSON
+      if (response.headers['content-type'] != null &&
+          response.headers['content-type']!.contains('application/json')) {
+        final responseData = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseData['message'] ?? 'Password changed successfully')),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseData['message'] ?? 'Failed to change password')),
+          );
+        }
+      } else {
+        // Kalau bukan JSON, tampilkan isi body
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unexpected response:\n${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -48,10 +97,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Change Password',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
+              const Text('Change Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 4),
               const Text('Change your password here!'),
               const SizedBox(height: 24),
@@ -63,9 +109,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFFFFFFF),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureTextCurrent ? Icons.visibility_off : Icons.visibility,
@@ -88,9 +132,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFFFFFFF),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureTextNew ? Icons.visibility_off : Icons.visibility,

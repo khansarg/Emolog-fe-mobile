@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:emolog/features/login/login.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,6 +16,42 @@ class _RegisterPageState extends State<RegisterPage> {
   String password = '';
   String confirmPass = '';
   bool _obscureText = true;
+  Future<void> registerUser() async {
+    final url = Uri.parse('http://10.0.2.2:8000/api/register');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'email': email,
+          'password': password,
+          'password_confirmation': confirmPass,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration successful")),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'] ?? 'Registration failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -207,17 +245,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child:
-                      ElevatedButton(onPressed: () {
-
-                          if (confirmPass == password){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const LoginPage()),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Your password and confirmed password doesn't match")));
-                          }
-                      },
+    ElevatedButton(onPressed: () {
+    if (confirmPass == password){
+    registerUser();
+    } else {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Your password and confirmed password doesn't match")));
+    }
+    },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFA16868),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),
