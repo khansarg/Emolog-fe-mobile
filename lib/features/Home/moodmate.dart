@@ -53,7 +53,7 @@ class _MoodMateScreenState extends State<MoodMateScreen> {
     final token = await getToken();
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8000/api/moods/today'),
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json',},
     );
 
     if (response.statusCode == 200) {

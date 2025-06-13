@@ -22,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json',},
         body: jsonEncode({
           'username': username,
           'email': email,

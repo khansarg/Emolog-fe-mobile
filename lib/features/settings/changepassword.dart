@@ -44,7 +44,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
 
-    final url = Uri.parse('http://10.0.2.2:8000/api/change-password'); // ganti IP jika perlu
+    final url = Uri.parse('http://10.0.2.2:8000/api/change-password');
 
     try {
       final response = await http.post(
@@ -52,6 +52,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
         },
         body: jsonEncode({
           'current_password': currentPassword,

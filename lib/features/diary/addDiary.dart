@@ -45,7 +45,7 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
       return;
     }
 
-    final uri = Uri.parse('http://10.0.2.2:8000/api/diary'); // sesuaikan endpoint
+    final uri = Uri.parse('http://10.0.2.2:8000/api/diary');
     final response = await http.post(
       uri,
       headers: {

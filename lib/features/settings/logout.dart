@@ -24,6 +24,7 @@ class LogoutDialog extends StatelessWidget {
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       );
 

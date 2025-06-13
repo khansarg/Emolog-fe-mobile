@@ -27,7 +27,8 @@ class _AccountPageState extends State<AccountPage> {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json',
+          'Accept': 'application/json',},
         body: jsonEncode({
           'username': field == 'Username' ? newValue : _usernameController.text,
           'email': field == 'Email' ? newValue : _emailController.text,
@@ -211,7 +212,7 @@ class _AccountPageState extends State<AccountPage> {
           final url = Uri.parse('http://10.0.2.2:8000/api/check-user');
           final response = await http.post(
             url,
-            headers: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json',  'Accept': 'application/json',},
             body: jsonEncode({'username': username, 'email': email}),
           );
 

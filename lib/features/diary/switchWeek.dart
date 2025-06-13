@@ -60,7 +60,7 @@ class _WeekViewState extends State<WeekView> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 
-    final url = Uri.parse('http://10.0.2.2:8000/api/diaries/$diaryId');
+    final url = Uri.parse('http://10.0.2.2:8000/api/diary/$diaryId');
 
     final response = await http.delete(
       url,
@@ -72,7 +72,6 @@ class _WeekViewState extends State<WeekView> {
 
     if (response.statusCode == 200) {
       print('Diary berhasil dihapus');
-      // Lakukan sesuatu, misal refresh list atau pop
     } else {
       print('Gagal menghapus diary');
       print(response.body);
@@ -399,7 +398,7 @@ class DiaryDetailPage extends StatelessWidget {
                           builder: (context) => EditDiaryPage(
                             entry: entry,
                             onSave: (updatedEntry) {
-                              Navigator.pop(context, updatedEntry); // Kembali dengan entri yang diupdate
+                              Navigator.pop(context, updatedEntry);
                             },
                           ),
                         ),
